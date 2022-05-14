@@ -87,7 +87,6 @@ class MapsPageState extends State<MapsPage> {
   @override
   void initState() {
     super.initState();
-    // _setTempMarker(LatLng(-6.6512086, 106.6384095));
     (widget._controller.text.isNotEmpty) ? null : getCurrentLocation();
     final temp = widget._controller.text.split(' ');
     _kGooglePlex = CameraPosition(
@@ -112,6 +111,7 @@ class MapsPageState extends State<MapsPage> {
       ),
       body: Column(
         children: [
+          Text("Long press the map to save location"),
           Expanded(
             child: GoogleMap(
               zoomControlsEnabled: false,

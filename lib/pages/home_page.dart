@@ -3,6 +3,9 @@ import 'package:todo_list/helper/sql_helper.dart';
 import 'package:todo_list/models/todo.dart';
 import 'package:todo_list/pages/add_todo_page.dart';
 import 'package:todo_list/pages/detail_todo_page.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -18,22 +21,30 @@ class _HomePageState extends State<HomePage> {
   // This function is used to fetch all data from the database
   void _refreshJournals() async {
     final data = await SQLHelper.getItems();
-    setState(() {
-      for (var element in data) {
-        _toDo.add(ToDo.fromMap(element));
-      }
-    });
-  }
 
-  Future onGoBack(dynamic value) async {
-    _refreshJournals();
+    for (var element in data) {
+      _toDo.add(ToDo.fromMap(element));
+    }
+    if (!mounted) return;
     setState(() {});
   }
 
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
   @override
   void initState() {
     super.initState();
     _refreshJournals();
+    tz.initializeTimeZones();
+    tz.setLocalLocation(tz.getLocation('America/Detroit'));
+    AndroidInitializationSettings initializationSettingsAndroid =
+        AndroidInitializationSettings('app_icon');
+    IOSInitializationSettings initializationSettingsIOS =
+        IOSInitializationSettings();
+    InitializationSettings initializationSettings = InitializationSettings(
+        android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
+    flutterLocalNotificationsPlugin.initialize(initializationSettings,
+        onSelectNotification: selectNotification);
   }
 
   @override
@@ -43,14 +54,17 @@ class _HomePageState extends State<HomePage> {
         title: const Text(
           "ToDo List",
         ),
-        // backgroundColor: Colors.black.withOpacity(0.9),
-        // elevation: 0,
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Route route =
+          /* Route route =
               MaterialPageRoute(builder: (context) => const AddToDoPage());
-          Navigator.push(context, route).then(onGoBack);
+          Navigator.push(context, route).then(onGoBack); */
+          Navigator.push(context, MaterialPageRoute(
+            builder: (context) {
+              return AddToDoPage();
+            },
+          ));
         },
         child: const Icon(
           Icons.add,
@@ -168,6 +182,16 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
       ),
+    );
+  }
+
+  void selectNotification(String? payload) async {
+    if (payload != null) {
+      debugPrint('notification payload: $payload');
+    }
+    await Navigator.push(
+      context,
+      MaterialPageRoute<void>(builder: (context) => HomePage()),
     );
   }
 }

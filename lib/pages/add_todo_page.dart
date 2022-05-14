@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:todo_list/helper/sql_helper.dart';
 import 'package:todo_list/models/todo.dart';
+import 'package:todo_list/pages/home_page.dart';
 import 'package:todo_list/widgets/container_date_picker.dart';
 import 'package:todo_list/widgets/container_location_picker.dart';
 import 'package:todo_list/widgets/container_textfield.dart';
@@ -104,7 +105,11 @@ class _AddToDoPageState extends State<AddToDoPage> {
                           location: _locationController.text,
                         );
                         await SQLHelper.createItem(_items);
-                        Navigator.pop(context);
+                        Navigator.pushAndRemoveUntil(context, MaterialPageRoute(
+                          builder: (context) {
+                            return HomePage();
+                          },
+                        ), (route) => false);
                       } else {
                         showDialog(
                             context: context,
